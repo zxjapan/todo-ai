@@ -1,4 +1,4 @@
-// Todo List Application
+
 class todoapp {
     constructor() {
         this.todos = JSON.parse(localStorage.getItem('todos')) || [];
