@@ -1,280 +1,216 @@
 // Todo List Application
-class TodoApp {
+class todoapp {
     constructor() {
         this.todos = JSON.parse(localStorage.getItem('todos')) || [];
-        this.currentFilter = 'all';
+        this.currentfilter = 'all';
         this.init();
     }
 
     init() {
-        this.bindEvents();
-        this.renderTodos();
-        this.updateStats();
+        this.bindevents();
+        this.rendertodos();
+        this.updatestats();
     }
 
-    bindEvents() {
-        // Add todo button
-        const addBtn = document.getElementById('addTodo');
-        const todoInput = document.getElementById('todoInput');
+    bindevents() {
+        const addbtn = document.getElementById('addTodo');
+        const todoinput = document.getElementById('todoInput');
 
-        addBtn.addEventListener('click', () => this.addTodo());
-        todoInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.addTodo();
-            }
+        addbtn.addEventListener('click', () => this.addtodo());
+        todoinput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') this.addtodo();
         });
 
-        // Filter buttons
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        filterBtns.forEach(btn => {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                this.setFilter(btn.dataset.filter);
-                this.updateFilterButtons();
+                this.setfilter(btn.dataset.filter);
+                this.updatefilterbuttons();
             });
         });
 
-        // Clear completed button
-        const clearCompletedBtn = document.getElementById('clearCompleted');
-        clearCompletedBtn.addEventListener('click', () => this.clearCompleted());
+        document.getElementById('clearCompleted').addEventListener('click', () => this.clearcompleted());
     }
 
-    addTodo() {
-        const todoInput = document.getElementById('todoInput');
-        const text = todoInput.value.trim();
-
-        if (text === '') {
-            this.showNotification('Please enter a task!', 'error');
+    addtodo() {
+        const inp = document.getElementById('todoInput');
+        const txt = inp.value.trim();
+        if (!txt) {
+            this.shownotification('please enter a task!', 'error');
             return;
         }
-
-        const todo = {
+        this.todos.unshift({
             id: Date.now(),
-            text: text,
+            text: txt,
             completed: false,
-            createdAt: new Date().toISOString()
-        };
-
-        this.todos.unshift(todo);
-        this.saveTodos();
-        this.renderTodos();
-        this.updateStats();
-
-        todoInput.value = '';
-        todoInput.focus();
-
-        this.showNotification('Task added successfully!', 'success');
+            createdat: new Date().toISOString()
+        });
+        this.savetodos();
+        this.rendertodos();
+        this.updatestats();
+        inp.value = '';
+        inp.focus();
+        this.shownotification('task added successfully!', 'success');
     }
 
-    toggleTodo(id) {
-        const todo = this.todos.find(t => t.id === id);
-        if (todo) {
-            const wasCompleted = todo.completed;
-            todo.completed = !todo.completed;
-            this.saveTodos();
-            this.renderTodos();
-            this.updateStats();
-
-            // Add individual checkbox animation
-            this.animateIndividualCheckbox(id);
+    toggletodo(id) {
+        const t = this.todos.find(x => x.id === id);
+        if (t) {
+            t.completed = !t.completed;
+            this.savetodos();
+            this.rendertodos();
+            this.updatestats();
+            this.animatecheckbox(id);
         }
     }
 
-    animateIndividualCheckbox(todoId) {
-        const todoItem = document.querySelector(`[data-id="${todoId}"]`);
-        if (todoItem) {
-            const checkboxContainer = todoItem.querySelector('.checkbox-container');
-            if (checkboxContainer) {
-                // Add the completing class to trigger individual animation
-                checkboxContainer.classList.add('completing');
-                
-                // Remove the class after animation completes
-                setTimeout(() => {
-                    checkboxContainer.classList.remove('completing');
-                }, 600);
+    animatecheckbox(id) {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        if (el) {
+            const box = el.querySelector('.checkbox-container');
+            if (box) {
+                box.classList.add('completing');
+                setTimeout(() => box.classList.remove('completing'), 600);
             }
         }
     }
 
-    deleteTodo(id) {
-        const index = this.todos.findIndex(t => t.id === id);
-        if (index > -1) {
-            this.todos.splice(index, 1);
-            this.saveTodos();
-            this.renderTodos();
-            this.updateStats();
-            this.showNotification('Task deleted!', 'info');
+    deletetodo(id) {
+        const i = this.todos.findIndex(x => x.id === id);
+        if (i > -1) {
+            this.todos.splice(i, 1);
+            this.savetodos();
+            this.rendertodos();
+            this.updatestats();
+            this.shownotification('task deleted!', 'info');
         }
     }
 
-    clearCompleted() {
-        const completedCount = this.todos.filter(t => t.completed).length;
-        if (completedCount === 0) {
-            this.showNotification('No completed tasks to clear!', 'info');
+    clearcompleted() {
+        const n = this.todos.filter(x => x.completed).length;
+        if (!n) {
+            this.shownotification('no completed tasks to clear!', 'info');
             return;
         }
-
-        this.todos = this.todos.filter(t => !t.completed);
-        this.saveTodos();
-        this.renderTodos();
-        this.updateStats();
-        this.showNotification(`${completedCount} completed tasks cleared!`, 'success');
+        this.todos = this.todos.filter(x => !x.completed);
+        this.savetodos();
+        this.rendertodos();
+        this.updatestats();
+        this.shownotification(`${n} completed tasks cleared!`, 'success');
     }
 
-    setFilter(filter) {
-        this.currentFilter = filter;
-        this.renderTodos();
+    setfilter(f) {
+        this.currentfilter = f;
+        this.rendertodos();
     }
 
-    updateFilterButtons() {
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        filterBtns.forEach(btn => {
+    updatefilterbuttons() {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.classList.remove('active');
-            if (btn.dataset.filter === this.currentFilter) {
-                btn.classList.add('active');
-            }
+            if (btn.dataset.filter === this.currentfilter) btn.classList.add('active');
         });
     }
 
-    getFilteredTodos() {
-        switch (this.currentFilter) {
-            case 'active':
-                return this.todos.filter(t => !t.completed);
-            case 'completed':
-                return this.todos.filter(t => t.completed);
-            default:
-                return this.todos;
-        }
+    getfilteredtodos() {
+        if (this.currentfilter === 'active') return this.todos.filter(x => !x.completed);
+        if (this.currentfilter === 'completed') return this.todos.filter(x => x.completed);
+        return this.todos;
     }
 
-    renderTodos() {
-        const todoList = document.getElementById('todoList');
-        const filteredTodos = this.getFilteredTodos();
-
-        if (filteredTodos.length === 0) {
-            todoList.innerHTML = this.getEmptyStateHTML();
+    rendertodos() {
+        const list = document.getElementById('todoList');
+        const arr = this.getfilteredtodos();
+        if (!arr.length) {
+            list.innerHTML = this.getemptystatehtml();
             return;
         }
-
-        todoList.innerHTML = filteredTodos.map(todo => this.getTodoHTML(todo)).join('');
-        
-        // Add event listeners to new elements
-        this.addTodoEventListeners();
+        list.innerHTML = arr.map(t => this.gettodohtml(t)).join('');
+        this.addevents();
     }
 
-    getTodoHTML(todo) {
-        const completedClass = todo.completed ? 'completed' : '';
-        const checkedAttr = todo.completed ? 'checked' : '';
-        
+    gettodohtml(t) {
+        const c = t.completed ? 'completed' : '';
+        const checked = t.completed ? 'checked' : '';
         return `
-            <div class="todo-item ${completedClass}" data-id="${todo.id}">
+            <div class="todo-item ${c}" data-id="${t.id}">
                 <label class="checkbox-container">
-                    <input type="checkbox" ${checkedAttr}>
+                    <input type="checkbox" ${checked}>
                     <span class="checkmark"></span>
                 </label>
-                <span class="todo-text">${this.escapeHtml(todo.text)}</span>
-                <button class="delete-btn" title="Delete task">
+                <span class="todo-text">${this.escapehtml(t.text)}</span>
+                <button class="delete-btn" title="delete task">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
         `;
     }
 
-    getEmptyStateHTML() {
-        const messages = {
-            all: {
-                icon: 'fas fa-clipboard-list',
-                title: 'No tasks yet!',
-                message: 'Add your first task to get started.'
-            },
-            active: {
-                icon: 'fas fa-clock',
-                title: 'No active tasks!',
-                message: 'All caught up! Time to relax.'
-            },
-            completed: {
-                icon: 'fas fa-check-circle',
-                title: 'No completed tasks!',
-                message: 'Complete some tasks to see them here.'
-            }
+    getemptystatehtml() {
+        const m = {
+            all: { icon: 'fas fa-clipboard-list', title: 'no tasks yet!', message: 'add your first task to get started.' },
+            active: { icon: 'fas fa-clock', title: 'no active tasks!', message: 'all caught up! time to relax.' },
+            completed: { icon: 'fas fa-check-circle', title: 'no completed tasks!', message: 'complete some tasks to see them here.' }
         };
-
-        const currentMessage = messages[this.currentFilter];
-        
+        const cur = m[this.currentfilter];
         return `
             <div class="empty-state">
-                <i class="${currentMessage.icon}"></i>
-                <h3>${currentMessage.title}</h3>
-                <p>${currentMessage.message}</p>
+                <i class="${cur.icon}"></i>
+                <h3>${cur.title}</h3>
+                <p>${cur.message}</p>
             </div>
         `;
     }
 
-    addTodoEventListeners() {
-        // Checkbox event listeners
-        const checkboxes = document.querySelectorAll('.todo-item input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const todoItem = e.target.closest('.todo-item');
-                const todoId = parseInt(todoItem.dataset.id);
-                this.toggleTodo(todoId);
+    addevents() {
+        document.querySelectorAll('.todo-item input[type="checkbox"]').forEach(box => {
+            box.addEventListener('change', e => {
+                const item = e.target.closest('.todo-item');
+                const id = parseInt(item.dataset.id);
+                this.toggletodo(id);
             });
         });
-
-        // Delete button event listeners
-        const deleteBtns = document.querySelectorAll('.delete-btn');
-        deleteBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
                 e.stopPropagation();
-                const todoItem = e.target.closest('.todo-item');
-                const todoId = parseInt(todoItem.dataset.id);
-                this.deleteTodo(todoId);
+                const item = e.target.closest('.todo-item');
+                const id = parseInt(item.dataset.id);
+                this.deletetodo(id);
             });
         });
     }
 
-    updateStats() {
-        const statsText = document.getElementById('todoStats').querySelector('.stats-text');
-        const activeCount = this.todos.filter(t => !t.completed).length;
-        const totalCount = this.todos.length;
-
-        if (totalCount === 0) {
-            statsText.textContent = 'No tasks yet';
-        } else if (activeCount === 0) {
-            statsText.textContent = 'All tasks completed!';
-        } else if (activeCount === 1) {
-            statsText.textContent = '1 task remaining';
-        } else {
-            statsText.textContent = `${activeCount} tasks remaining`;
-        }
+    updatestats() {
+        const stats = document.getElementById('todoStats').querySelector('.stats-text');
+        const active = this.todos.filter(x => !x.completed).length;
+        const total = this.todos.length;
+        if (!total) stats.textContent = 'no tasks yet';
+        else if (!active) stats.textContent = 'all tasks completed!';
+        else if (active === 1) stats.textContent = '1 task remaining';
+        else stats.textContent = `${active} tasks remaining`;
     }
 
-    saveTodos() {
+    savetodos() {
         localStorage.setItem('todos', JSON.stringify(this.todos));
     }
 
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    escapehtml(txt) {
+        const d = document.createElement('div');
+        d.textContent = txt;
+        return d.innerHTML;
     }
 
-    showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.innerHTML = `
-            <i class="fas fa-${this.getNotificationIcon(type)}"></i>
-            <span>${message}</span>
+    shownotification(msg, type = 'info') {
+        const n = document.createElement('div');
+        n.className = `notification notification-${type}`;
+        n.innerHTML = `
+            <i class="fas fa-${this.getnotificationicon(type)}"></i>
+            <span>${msg}</span>
         `;
-
-        // Add styles with dark theme colors
         const colors = {
             success: '#10b981',
             error: '#ef4444',
             info: '#3b82f6'
         };
-
-        notification.style.cssText = `
+        n.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
@@ -292,24 +228,15 @@ class TodoApp {
             transition: transform 0.3s ease;
             max-width: 300px;
         `;
-
-        document.body.appendChild(notification);
-
-        // Animate in
+        document.body.appendChild(n);
+        setTimeout(() => { n.style.transform = 'translateX(0)' }, 100);
         setTimeout(() => {
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-
-        // Remove after 3 seconds
-        setTimeout(() => {
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
+            n.style.transform = 'translateX(100%)';
+            setTimeout(() => { document.body.removeChild(n) }, 300);
         }, 3000);
     }
 
-    getNotificationIcon(type) {
+    getnotificationicon(type) {
         const icons = {
             success: 'check-circle',
             error: 'exclamation-circle',
@@ -317,29 +244,17 @@ class TodoApp {
         };
         return icons[type] || 'info-circle';
     }
-
-    getNotificationColor(type) {
-        const colors = {
-            success: '#10b981',
-            error: '#ef4444',
-            info: '#3b82f6'
-        };
-        return colors[type] || '#3b82f6';
-    }
 }
 
-// Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new TodoApp();
+    new todoapp();
 });
 
-// Add some sample todos for demonstration (remove in production)
 if (localStorage.getItem('todos') === null) {
-    const sampleTodos = [
-        { id: 1, text: 'Welcome to your new dark-themed todo list!', completed: true, createdAt: new Date().toISOString() },
-        { id: 2, text: 'Click the checkbox to mark tasks as complete', completed: false, createdAt: new Date().toISOString() },
-        { id: 3, text: 'Watch the satisfying animations!', completed: false, createdAt: new Date().toISOString() },
-        { id: 4, text: 'Your tasks are automatically saved locally', completed: false, createdAt: new Date().toISOString() }
+    const sample = [
+        { id: 1, text: 'welcome to your new dark-themed todo list!', completed: true, createdat: new Date().toISOString() },
+        { id: 2, text: 'click the checkbox to mark tasks as complete', completed: false, createdat: new Date().toISOString() },
+        { id: 3, text: 'your tasks are automatically saved locally', completed: false, createdat: new Date().toISOString() }
     ];
-    localStorage.setItem('todos', JSON.stringify(sampleTodos));
+    localStorage.setItem('todos', JSON.stringify(sample));
 } 
